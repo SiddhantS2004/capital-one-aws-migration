@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capital One | Credit Application Centre</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">◒</span><span>capital one</span><small>DEMO PORTAL</small></div>
+    <nav>
+  <a class="active" href="#overview">Overview</a>
+  <a href="#new-application">New application</a>
+</nav>
+    <div class="top-right"><span class="secure-dot"></span> Secure demo environment</div>
+  </header>
+
+  <main class="shell">
+    <section class="welcome" id="overview">
+      <div>
+        <p class="eyebrow">CUSTOMER OPERATIONS</p>
+        <h1>Credit Application Centre</h1>
+        <p class="subheading">A single view of incoming credit card applications and their current status.</p>
+      </div>
+      <div class="welcome-chip"><span class="pulse"></span> Application system online</div>
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <section class="metric-grid">
+      <article class="metric-card">
+        <div class="metric-top"><span>Total applications</span><span class="metric-icon">▤</span></div>
+        <strong>{{ metrics.total }}</strong><small>All applications in the database</small>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Received</span><span class="metric-icon blue">↗</span></div>
+        <strong>{{ metrics.received }}</strong><small>Awaiting initial review</small>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Under review</span><span class="metric-icon amber">◷</span></div>
+        <strong>{{ metrics.under_review }}</strong><small>In the review queue</small>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Average requested limit</span><span class="metric-icon green">$</span></div>
+        <strong>${{ "{:,.0f}".format(metrics.avg_limit or 0) }}</strong><small>Across submitted applications</small>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <section class="panel form-panel" id="new-application">
+        <div class="section-heading">
+          <div><p class="eyebrow">CUSTOMER INTAKE</p><h2>Start a new application</h2></div>
+          <span class="step-label">8 details required</span>
+        </div>
+        <form action="{{ url_for('apply') }}" method="post">
+          <div class="form-grid">
+            <label>Full name<input name="full_name" maxlength="120" placeholder="e.g. Alex Morgan" required></label>
+            <label>Email address<input name="email" type="email" maxlength="160" placeholder="alex@example.com" required></label>
+            <label>Phone number<input name="phone" type="tel" maxlength="30" placeholder="+1 202 555 0100" required></label>
+            <label>Employment type
+              <select name="employment_type" required>
+                <option value="">Select employment type</option><option>Salaried</option><option>Self-employed</option><option>Student</option><option>Retired</option><option>Other</option>
+              </select>
+            </label>
+            <label>Annual income (USD)<div class="input-prefix"><span>$</span><input name="annual_income" type="number" min="1" step="0.01" placeholder="75000" required></div></label>
+            <label>Requested credit limit (USD)<div class="input-prefix"><span>$</span><input name="requested_credit_limit" type="number" min="1" step="0.01" placeholder="10000" required></div></label>
+            <label>Card product
+              <select name="card_type" required>
+                <option value="">Choose a demo card</option><option>Quicksilver Cash Rewards</option><option>Savor Cash Rewards</option><option>Platinum Mastercard</option><option>Venture Travel Rewards</option>
+              </select>
+            </label>
+            <label>Housing status
+              <select name="housing_status" required>
+                <option value="">Select housing status</option><option>Own</option><option>Rent</option><option>With Family</option><option>Other</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-foot"><p>Submitting creates a demo record only. No credit check or real approval decision is performed.</p><button type="submit">Submit application <span>→</span></button></div>
+        </form>
+      </section>
+
+      <aside class="side-column">
+        <section class="panel info-panel">
+          <div class="info-symbol">i</div>
+          <h3>How this demo works</h3>
+          <p>When the form is submitted, the backend validates the details, writes a record to PostgreSQL and generates a unique application reference.</p>
+          <ul><li>Application ID generated automatically</li><li>Submission timestamp stored by database</li><li>Initial status set to Received</li><li>Dashboard metrics update from database records</li></ul>
+        </section>
+        <section class="panel architecture-panel">
+          <p class="eyebrow">PROJECT ARCHITECTURE</p>
+          <h3>Two-tier application</h3>
+          <div class="arch-node"><span>WEB</span><div><b>Flask application</b><small>Form, validation & dashboard</small></div></div>
+          <div class="connector"></div>
+          <div class="arch-node db-node"><span>DB</span><div><b>PostgreSQL</b><small>Customer application records</small></div></div>
+          <p class="architecture-note">The database can run locally in Docker or separately on Amazon RDS without changing the application logic.</p>
+        </section>
+      </aside>
+    </section>
+
+    <footer><span>Capital One-inspired Cloud Computing PoC</span><span>IT457 · Migration & Transformation · Not an official Capital One service</span></footer>
+  </main>
+</body>
+</html>

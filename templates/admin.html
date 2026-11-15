@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Credit Application Centre</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-mark">◒</span>
+            <span>capital one</span>
+            <small>ADMIN PORTAL</small>
+        </div>
+        <nav>
+            <a class="active" href="{{ url_for('admin_dashboard') }}">Applications</a>
+            <a href="{{ url_for('index') }}">Public website</a>
+        </nav>
+        <form method="POST" action="{{ url_for('admin_logout') }}">
+            <button type="submit">Logout</button>
+        </form>
+    </header>
+
+    <main class="shell">
+        <section class="welcome">
+            <div>
+                <p class="eyebrow">RESTRICTED ACCESS</p>
+                <h1>Application Management</h1>
+                <p class="subheading">Review and manage submitted credit card applications.</p>
+            </div>
+            <div class="welcome-chip">
+                <span class="pulse"></span> Administrator session active
+            </div>
+        </section>
+
+        <section class="metric-grid">
+            <article class="metric-card">
+                <div class="metric-top"><span>Total applications</span></div>
+                <strong>{{ metrics.total }}</strong>
+                <small>All database records</small>
+            </article>
+            <article class="metric-card">
+                <div class="metric-top"><span>Received</span></div>
+                <strong>{{ metrics.received }}</strong>
+                <small>Awaiting initial review</small>
+            </article>
+            <article class="metric-card">
+                <div class="metric-top"><span>Under review</span></div>
+                <strong>{{ metrics.under_review }}</strong>
+                <small>In the review queue</small>
+            </article>
+            <article class="metric-card">
+                <div class="metric-top"><span>Average requested limit</span></div>
+                <strong>${{ "{:,.0f}".format(metrics.avg_limit or 0) }}</strong>
+                <small>Across all applications</small>
+            </article>
+        </section>
+
+        <section class="panel table-panel">
+            <div class="section-heading table-heading">
+                <div>
+                    <p class="eyebrow">APPLICATION PIPELINE</p>
+                    <h2>All applications</h2>
+                </div>
+                <div class="table-tools">
+                    <input id="searchBox" type="search" placeholder="Search name or application ID">
+                    <span>{{ applications|length }} records</span>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table id="applicationsTable">
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Applicant</th>
+                            <th>Phone</th>
+                            <th>Employment</th>
+                            <th>Card product</th>
+                            <th>Annual income</th>
+                            <th>Requested limit</th>
+                            <th>Housing</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in applications %}
+                        <tr>
+                            <td class="ref">
+                                {{ item.application_ref }}
+                                {% if item.is_demo %}<small>DEMO DATA</small>{% endif %}
+                            </td>
+                            <td>
+                                <b>{{ item.full_name }}</b>
+                                <small>{{ item.email }}</small>
+                            </td>
+                            <td>{{ item.phone }}</td>
+                            <td>{{ item.employment_type }}</td>
+                            <td>{{ item.card_type }}</td>
+                            <td>${{ "{:,.0f}".format(item.annual_income) }}</td>
+                            <td>${{ "{:,.0f}".format(item.requested_credit_limit) }}</td>
+                            <td>{{ item.housing_status }}</td>
+                            <td>{{ item.created_at.strftime("%d %b %Y, %H:%M") if item.created_at else "—" }}</td>
+                            <td>
+                                <span class="status {{ item.application_status|lower|replace(' ', '-') }}">
+                                    {{ item.application_status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="10" class="empty">No applications found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="table-note">
+                Synthetic records are marked DEMO DATA. This is a demonstration system,
+                not a real credit approval platform.
+            </p>
+        </section>
+
+        <footer>
+            <span>Capital One-inspired Cloud Computing PoC</span>
+            <span>Restricted administrator area · IT457</span>
+        </footer>
+    </main>
+
+    <script>
+        const searchBox = document.getElementById("searchBox");
+
+        searchBox.addEventListener("input", () => {
+            const query = searchBox.value.toLowerCase();
+
+            document.querySelectorAll("#applicationsTable tbody tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+            });
+        });
+    </script>
+</body>
+</html>
